@@ -1,0 +1,101 @@
+#!/bin/bash
+# env variables to see: pipe delimited list of service names as $services
+# the $profile you want to use
+basepath=/tmp/aws-pipeline-status
+lockpath=$basepath/aws-pipe-status-daemon.lock
+mfapipe="$basepath/mfa-pipe"
+# Make sure we remove lockfile no matter how we exit
+trap "rm -f $lockpath; rm -f $mfapipe" EXIT
+
+# Create lockfile or exit if fail
+if [ -f "$lockpath" ]; then
+  echo "Aws Statusline Daemon Already Running...Exiting..."
+  exit 1;
+fi
+
+if [ ! -d $basepath ]; then
+  mkdir $basepath
+fi
+
+touch $lockpath || exit 1
+
+if [ ! -f "$1" ]; then
+  config="$HOME/pipeline.json"
+else
+  config=$1
+fi
+profile=eng-tooling
+red=#cc6666
+redicon=●
+green=#b5bd68
+greenicon=●
+region=us-east-1;
+stage=Development
+services=($services)
+failed=0
+succeeded=0
+
+IFS=$'\n'; set -f
+if [ ! -f "$config" ]; then
+  echo Missing Config $config
+  exit 1
+fi
+for service in `cat $config | jq -cr '.services[] | "\(.name) \(.stage) \(.region) \(.profile)"'`
+do
+  IFS=" ";
+  result=""
+  read -r name stage region profile <<< "$service"
+  # we start a detached screen so we can inject an AWS MFA code
+  screens=`screen -list | grep $name`
+  if [ -z "$screens" ]; then
+    screen -d -S $name -m sh
+  fi
+  pipe="pipe-$name"
+  if [ ! -p $pipe ]; then
+    mkfifo $pipe
+  fi
+  screen -S $name -p 0 -X stuff "aws codepipeline get-pipeline-state --name $name --region $region --profile $profile --output json >$pipe ^M"
+  sleep 3
+  while read -t 3 line <$pipe
+  do
+    result="$result$line"
+  done
+  #result=`cat "$HOME/.$name.log" | sed -ne '/^{/,$ p' | sed '/^}/q' | jq ".stageStates[] | select(.stageName == \"$stage\") | .latestExecution.status"`
+  if [ -z "$result" ]; then
+    if [ ! -p "$mfapipe" ]; then
+      mkfifo "$mfapipe"
+    fi
+    read mfa <$mfapipe
+    rm $mfapipe
+    screen -S $name -p 0 -X stuff "$mfa^M"
+    sleep 3
+  fi
+  final=`echo $result | jq ".stageStates[] | select(.stageName == \"$stage\") | .latestExecution.status"`
+  if [ -f "$basepath/$name" ]; then
+    prev=`cat $basepath/$name`
+  fi
+  if [ "$final" = \"Failed\" ]; then
+    failed=$(($failed + 1))
+  else
+    succeeded=$(($succeeded + 1))
+  fi
+  if [ "$prev" != "$final" ]; then
+    if [ "$final" == \"Failed\" ]; then
+      urgency=critical
+    else
+      urgency=low
+    fi
+    notify-send -u $urgency $name "$final\n https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view?region=$region"
+  fi
+  `echo $final > $basepath/$name`
+  aws-pipeline-tally
+done
+
+string=""
+if [ "$failed" -gt 0 ]; then
+  string="%{F$red}$redicon $failed "
+fi
+if [ $((succeeded)) > 0 ]; then
+  string="$string%{F$green}$greenicon $succeeded"
+fi
+echo "$string"
