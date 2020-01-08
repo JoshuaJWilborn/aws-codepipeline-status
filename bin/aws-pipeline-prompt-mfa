@@ -1,0 +1,7 @@
+#!/bin/bash
+mfapipe="/tmp/aws-pipeline-status/mfa-pipe"
+if [ -p "$mfapipe" ]; then
+  read -p "Enter MFA: " mfa;
+  echo "$mfa" >$mfapipe
+fi
+

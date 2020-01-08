@@ -1,0 +1,13 @@
+red=#cc6666
+redicon=●
+green=#b5bd68
+greenicon=●
+
+read status
+IFS=" ";
+read -r failed passing total <<< "$status"
+
+string="%{F$red}$redicon $failed %{F$green}$greenicon $passing"
+
+echo $string
+

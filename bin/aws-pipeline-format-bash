@@ -1,0 +1,21 @@
+CLEAR_STYLE="\[\033[0m\]"
+RGB_TO_FG() {
+  echo -e "\033[38;2;$1;$2;$3m"
+}
+RGB_TO_BG() {
+  echo -e "\033[48;2;$1;$2;$3m"
+}
+RED_FG=`RGB_TO_FG 226 120 120`
+
+GREEN_FG=`RGB_TO_FG 180 190 130`
+
+redicon=●
+greenicon=●
+
+read status
+IFS=" ";
+read -r failed passing total <<< "$status"
+
+string="$RED_FG$redicon $failed $GREEN_FG$greenicon $passing$clear"
+
+echo $string

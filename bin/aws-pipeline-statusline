@@ -18,6 +18,7 @@ if [ ! -d $basepath ]; then
 fi
 
 touch $lockpath || exit 1
+echo $$BASHPID > $lockpath
 
 if [ ! -f "$1" ]; then
   config="$HOME/pipeline.json"
@@ -25,10 +26,6 @@ else
   config=$1
 fi
 profile=eng-tooling
-red=#cc6666
-redicon=●
-green=#b5bd68
-greenicon=●
 region=us-east-1;
 stage=Development
 services=($services)
@@ -50,10 +47,15 @@ do
   if [ -z "$screens" ]; then
     screen -d -S $name -m sh
   fi
-  pipe="pipe-$name"
+  pipe="$basepath/pipe-$name"
   if [ ! -p $pipe ]; then
     mkfifo $pipe
   fi
+  
+  until ping -q -w 1 -c 1 8.8.8.8 > /dev/null
+  do
+  done
+
   screen -S $name -p 0 -X stuff "aws codepipeline get-pipeline-state --name $name --region $region --profile $profile --output json >$pipe ^M"
   sleep 3
   while read -t 3 line <$pipe
@@ -90,12 +92,3 @@ do
   `echo $final > $basepath/$name`
   aws-pipeline-tally
 done
-
-string=""
-if [ "$failed" -gt 0 ]; then
-  string="%{F$red}$redicon $failed "
-fi
-if [ $((succeeded)) > 0 ]; then
-  string="$string%{F$green}$greenicon $succeeded"
-fi
-echo "$string"

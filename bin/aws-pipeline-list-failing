@@ -10,5 +10,7 @@ do
   read -r _ _ _ name <<< "$path"
   echo -e "$red$name: failing $reset https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view"
 done
-
-sleep 10
+if [ -z "$failed" ]; then
+ echo No Failures
+fi
+read
