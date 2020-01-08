@@ -1,11 +1,32 @@
 # aws-codepipeline-status
 Various bash utilities and scripts to keep track of aws code pipeline statuses (passing, failing, building etc)
 
+Starting Daemon:
+
+`aws-codepipeline-status-daemon <absolute path to config file>`
+
+Start daemon in background:
+
+`$(aws-codepipeline-status-daemon <absolute path to config file>&) &`
+
+Getting output for bash:
+
+`aws-codepipeline-status-plain | aws-codepipeline-format-bash`
+
+Getting output for polybar:
+
+`aws-codepipeline-status-plain | aws-codepipeline-format-polybar`
+
+View list of failing services:
+
+`aws-codepipeline-list-failing`
+
 Requirements:
 
 * aws credentials properly configured in ~/.aws/credentials and ~/.aws/config
 * jq package
 * json configuration file
+* add the binaries to your path
 
 Schema for JSON config file:
 ```json

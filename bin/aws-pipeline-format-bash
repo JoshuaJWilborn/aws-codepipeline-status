@@ -1,3 +1,4 @@
+#!/bin/bash
 CLEAR_STYLE="\[\033[0m\]"
 RGB_TO_FG() {
   echo -e "\[\033[38;2;$1;$2;$3m\]"

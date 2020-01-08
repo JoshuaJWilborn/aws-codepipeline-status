@@ -1,3 +1,4 @@
+#!/bin/bash
 numfailing=`cat /tmp/aws-pipeline-status/numfailing || echo 0`
 numservices=`cat /tmp/aws-pipeline-status/numservices || echo 0`
 numnotfailing=`echo "$numservices - $numfailing" | bc`

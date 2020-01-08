@@ -1,3 +1,4 @@
+#!/bin/bash
 numservices=`find /tmp/aws-pipeline-status/ -maxdepth 1 -mindepth 1 | wc -l`
 numfailed=`grep -lr Failed /tmp/aws-pipeline-status/ | wc -l`
 
