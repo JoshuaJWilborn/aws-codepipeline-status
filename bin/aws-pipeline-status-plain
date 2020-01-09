@@ -1,4 +1,14 @@
 #!/bin/bash
+if [ ! -d /tmp/aws-pipeline-status ]; then
+  mkdir /tmp/aws-pipeline-status
+  chmod 777 /tmp/aws-pipeline-status
+fi
+if [ ! -f /tmp/aws-pipeline-status/numfailing ]; then
+  echo 0 > /tmp/aws-pipeline-status/numfailing
+fi
+if [ ! -f /tmp/aws-pipeline-status/numservices ]; then
+  echo 0 > /tmp/aws-pipeline-status/numservices
+fi
 numfailing=`cat /tmp/aws-pipeline-status/numfailing || echo 0`
 numservices=`cat /tmp/aws-pipeline-status/numservices || echo 0`
 numnotfailing=`echo "$numservices - $numfailing" | bc`

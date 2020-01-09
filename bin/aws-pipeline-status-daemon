@@ -15,6 +15,11 @@ fi
 
 if [ ! -d $basepath ]; then
   mkdir $basepath
+  chmod 777 $basepath
+fi
+if [ ! -d $basepath/services ]; then
+  mkdir $basepath/services
+  chmod 777 $basepath/services
 fi
 
 touch $lockpath || exit 1
@@ -44,7 +49,9 @@ do
     IFS=" ";
     result=""
     read -r name stage region profile <<< "$service"
+    echo $name
     # we start a detached screen so we can inject an AWS MFA code
+    screen -wipe
     screens=`screen -list | grep $name`
     if [ -z "$screens" ]; then
       screen -d -S $name -m sh
@@ -52,6 +59,7 @@ do
     pipe="$basepath/pipe-$name"
     if [ ! -p $pipe ]; then
       mkfifo $pipe
+      chmod 0666 $pipe
     fi
 
     until ping -q -w 1 -c 1 8.8.8.8 > /dev/null;
@@ -70,8 +78,14 @@ do
     if [ -z "$result" ]; then
       if [ ! -p "$mfapipe" ]; then
         mkfifo "$mfapipe"
+        chmod 0666 $mfapipe
       fi
-      read mfa <$mfapipe
+      reg="[0-9]{6,6}"
+      while [[ ! $mfa =~ ^${reg}$ ]]; do
+        echo waiting for mfa...
+        read mfa <$mfapipe
+        echo "MFA $mfa received..."
+      done
       rm $mfapipe
       screen -S $name -p 0 -X stuff "$mfa^M"
       sleep 3
@@ -93,7 +107,8 @@ do
       fi
       notify-send -u $urgency $name "$final\n https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view?region=$region"
     fi
-    `echo $final > $basepath/$name`
+    `echo $final > $basepath/services/$name`
+    echo $PATH
     aws-pipeline-tally
   done
 done
