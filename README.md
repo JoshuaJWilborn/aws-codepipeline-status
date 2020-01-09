@@ -21,6 +21,17 @@ View list of failing services:
 
 `aws-codepipeline-list-failing`
 
+To create a systemd service:
+note: be sure to replace user with the user you use for aws
+```
+[Unit]
+Description=AWS Pipeline Status Daemon
+[Service]
+Type=simple
+ExecStart=/bin/bash -c "HOME=/home/<user> PATH=/home/<user>/aws-codepipeline-status/bin:$PATH exec /usr/bin/bash aws-pipeline-status-daemon <path-to-config.json>"
+User=<user>
+```
+
 Requirements:
 
 * aws credentials properly configured in ~/.aws/credentials and ~/.aws/config
