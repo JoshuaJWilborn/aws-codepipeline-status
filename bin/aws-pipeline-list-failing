@@ -2,15 +2,17 @@
 bold='\e[1m'
 red='\e[31m'
 reset='\e[0m'
-failed=`grep -lr Failed /tmp/aws-pipeline-status/`
+failed=`grep -lr Failed /tmp/aws-pipeline-status/services`
 IFS=$'\n'; set -f
+string=""
 for path in $failed
 do
   IFS="\/";
   read -r _ _ _ name <<< "$path"
-  echo -e "$red$name: failing $reset https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view"
+  string="$string$red$name: failing $reset https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view"
 done
+string=`echo -e "$string" | column -t | sort`
 if [ -z "$failed" ]; then
- echo No Failures
+ echo "None failing"
 fi
 read

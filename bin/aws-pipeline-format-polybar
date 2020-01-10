@@ -8,15 +8,27 @@ unknownicon=
 runningicon=
 blue=#84a0c6
 grey=#c6c8d1
+
+listfailing='%{A1:termite --exec=aws-pipeline-list-failing & disown:}'
+listpassing='%{A1:termite --exec=aws-pipeline-list-passing & disown:}'
+listrunning='%{A1:termite --exec=aws-pipeline-list-running & disown:}'
+endclick='%{A}'
 read status
 IFS=" ";
 read -r failed passing running unknown <<< "$status"
 
 string="\
+$listfailing \
 %{F$red}$redicon $failed \
+$endclick \
+$listpassing \
 %{F$green}$greenicon $passing \
+$endclick \
+$listrunning \
 %{F$blue}$runningicon $running \
-%{F$grey}$unknownicon $unknown"
+$endclick \
+%{F$grey} $unknownicon $unknown \
+$endclick"
 
 echo $string
 
