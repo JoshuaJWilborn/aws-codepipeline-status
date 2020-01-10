@@ -4,11 +4,19 @@ redicon=●
 green=#b5bd68
 greenicon=●
 
+unknownicon=
+runningicon=
+blue=#84a0c6
+grey=#c6c8d1
 read status
 IFS=" ";
-read -r failed passing total <<< "$status"
+read -r failed passing running unknown <<< "$status"
 
-string="%{F$red}$redicon $failed %{F$green}$greenicon $passing"
+string="\
+%{F$red}$redicon $failed \
+%{F$green}$greenicon $passing \
+%{F$blue}$runningicon $running \
+%{F$grey}$unknownicon $unknown"
 
 echo $string
 

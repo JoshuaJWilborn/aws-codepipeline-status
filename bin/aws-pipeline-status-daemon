@@ -107,7 +107,11 @@ do
       fi
       notify-send -u $urgency $name "$final\n https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view?region=$region"
     fi
-    `echo $final > $basepath/services/$name`
+    if [ -z "$final" ]; then
+      echo "Unknown" > $basepath/services/$name
+    else
+      echo $final > $basepath/services/$name
+    fi
     echo $PATH
     aws-pipeline-tally
   done
