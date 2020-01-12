@@ -4,6 +4,7 @@
 basepath=/tmp/aws-pipeline-status
 lockpath=$basepath/aws-pipe-status-daemon.lock
 mfapipe="$basepath/mfa-pipe"
+defaultconfig="$HOME/.config/aws-pipeline/services.json"
 # Make sure we remove lockfile no matter how we exit
 trap "rm -rf $basepath" EXIT
 
@@ -25,17 +26,17 @@ fi
 touch $lockpath || exit 1
 echo $$BASHPID > $lockpath
 
-if [ ! -f "$1" ]; then
-  config="$HOME/pipeline.json"
+if [ -f "$1" ]; then
+  config="$1"
+elif [ -f "$AWS-PIPELINE-CONFIG" ];
+  config="$AWS-PIPELINE-CONFIG"
+elif [ -f "$defaultconfig" ];
+  config="$defaultconfig"
 else
-  config=$1
+  echo No config file
+  exit 1
 fi
-profile=eng-tooling
-region=us-east-1;
-stage=Development
 services=($services)
-failed=0
-succeeded=0
 
 cleanupscreenandmakenew() {
   screen -wipe
@@ -99,11 +100,6 @@ parseresult() {
   final=`echo $result | jq ".stageStates[] | select(.stageName == \"$stage\") | .latestExecution.status"`
   if [ -f "$basepath/$name" ]; then
     prev=`cat $basepath/$name`
-  fi
-  if [ "$final" = \"Failed\" ]; then
-    failed=$(($failed + 1))
-  else
-    succeeded=$(($succeeded + 1))
   fi
 }
 
