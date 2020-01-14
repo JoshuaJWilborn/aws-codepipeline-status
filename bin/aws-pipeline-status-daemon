@@ -28,9 +28,9 @@ echo $$BASHPID > $lockpath
 
 if [ -f "$1" ]; then
   config="$1"
-elif [ -f "$AWS-PIPELINE-CONFIG" ];
+elif [ -f "$AWS-PIPELINE-CONFIG" ]; then
   config="$AWS-PIPELINE-CONFIG"
-elif [ -f "$defaultconfig" ];
+elif [ -f "$defaultconfig" ]; then
   config="$defaultconfig"
 else
   echo No config file
