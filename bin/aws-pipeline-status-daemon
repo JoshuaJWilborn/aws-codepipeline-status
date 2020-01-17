@@ -6,7 +6,7 @@ lockpath=$basepath/aws-pipe-status-daemon.lock
 mfapipe="$basepath/mfa-pipe"
 defaultconfig="$HOME/.config/aws-pipeline/services.json"
 # Make sure we remove lockfile no matter how we exit
-trap "rm -rf $basepath" EXIT
+trap "echo 'clearing temp files and exiting...'; rm -rf $basepath" EXIT
 
 # Create lockfile or exit if fail
 if [ -f "$lockpath" ]; then
@@ -21,6 +21,11 @@ fi
 if [ ! -d $basepath/services ]; then
   mkdir $basepath/services
   chmod 777 $basepath/services
+fi
+
+if [ ! -d $basepath/pipes ]; then
+  mkdir $basepath/pipes
+  chmod 777 $basepath/pipes
 fi
 
 touch $lockpath || exit 1
@@ -39,14 +44,14 @@ fi
 services=($services)
 
 cleanupscreenandmakenew() {
-  screen -wipe
+  screen -wipe >/dev/null
   screens=$(screen -list | grep $name)
   if [ ! -z "$screens" ]; then
     echo killing screen
-    screen -S $name -X quit
+    screen -S $name -X quit >/dev/null
   fi
   echo making new screen
-  screen -d -S $name -m sh
+  screen -d -S $name -m sh >/dev/null
 }
 
 getresultforservice() {
@@ -87,6 +92,7 @@ getresultforservice() {
 
 sendnotification() {
   if [ "$prev" != "$final" ]; then
+    echo "$prev does not match $final"
     if [ "$final" == \"Failed\" ]; then
       urgency=critical
     else
@@ -97,9 +103,9 @@ sendnotification() {
 }
 
 parseresult() {
-  final=`echo $result | jq ".stageStates[] | select(.stageName == \"$stage\") | .latestExecution.status"`
-  if [ -f "$basepath/$name" ]; then
-    prev=`cat $basepath/$name`
+  final=$(echo $result | jq ".stageStates[] | select(.stageName == \"$stage\") | .latestExecution.status")
+  if [ -f "$basepath/services/$name" ]; then
+    prev=$(<"$basepath/services/$name")
   fi
 }
 
@@ -118,18 +124,18 @@ do
     echo Missing Config $config
     exit 1
   fi
-  for service in `cat $config | jq -cr '.services[] | "\(.name) \(.stage) \(.region) \(.profile)"'`
+  services=$(jq -cr '.services[] | "\(.name) \(.stage) \(.region) \(.profile)"' <$config)
+  for service in $services
   do
     IFS=" ";
     result=""
     read -r name stage region profile <<< "$service"
-    echo $name
     # we start a detached screen so we can inject an AWS MFA code
-    pipe="$basepath/pipe-$name"
+    pipe="$basepath/pipes/pipe-$name"
     while [ -z "$result" ]; do
       getresultforservice
     done
-    screen -S $name -X quit
+    screen -S $name -X quit >/dev/null
     parseresult
     sendnotification
     writeresulttofile

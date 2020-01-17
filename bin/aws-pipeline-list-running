@@ -9,10 +9,11 @@ for path in $running
 do
   IFS="\/";
   read -r _ _ _ name <<< "$path"
-  string="$string$blue$name: running $reset https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view"
+  string="$string $blue$name: running $reset https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view"
 done
 string=`echo -e "$string" | column -t | sort`
 if [ -z "$running" ]; then
   echo "None running"
 fi
+echo "$string"
 read
