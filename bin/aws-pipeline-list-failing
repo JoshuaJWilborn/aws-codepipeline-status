@@ -12,7 +12,7 @@ do
   read -r name <<< "$path"
   string="$string $red$name:$reset https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view \n"
 done
-string=`echo -e "$string" | column -t | sort`
+string=$(echo -e "$string" | column -t | sort)
 if [ -z "$failed" ]; then
  echo "None failing"
 fi

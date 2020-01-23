@@ -11,7 +11,7 @@ do
   read -r name <<< "$path"
   string="$string$green$name:$reset https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view\n"
 done
-string=`echo -e "$string" | column -t | sort`
+string=$(echo -e "$string" | column -t | sort)
 echo -e "$string"
 if [ -z "$passing" ]; then
   echo "None passing"

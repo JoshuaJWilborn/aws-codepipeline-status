@@ -19,9 +19,9 @@ if [ ! -f /tmp/aws-pipeline-status/numsucceeded ]; then
   echo 0 > /tmp/aws-pipeline-status/numsucceeded
 fi
 
-numfailing=`cat /tmp/aws-pipeline-status/numfailing || echo 0`
-numservices=`cat /tmp/aws-pipeline-status/numservices || echo 0`
-numsucceeded=`cat /tmp/aws-pipeline-status/numsucceeded || echo 0`
-numrunning=`cat /tmp/aws-pipeline-status/numrunning || echo 0`
-numunknown=`cat /tmp/aws-pipeline-status/numunknown || echo 0`
+numfailing=$(cat /tmp/aws-pipeline-status/numfailing || echo 0)
+numservices=$(cat /tmp/aws-pipeline-status/numservices || echo 0)
+numsucceeded=$(cat /tmp/aws-pipeline-status/numsucceeded || echo 0)
+numrunning=$(cat /tmp/aws-pipeline-status/numrunning || echo 0)
+numunknown=$(cat /tmp/aws-pipeline-status/numunknown || echo 0)
 echo "$numfailing $numsucceeded $numrunning $numunknown"

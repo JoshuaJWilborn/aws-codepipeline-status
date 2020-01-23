@@ -2,7 +2,7 @@
 bold='\e[1m'
 blue='\e[34m'
 reset='\e[0m'
-running=`grep -lr InProgress /tmp/aws-pipeline-status/services`
+running=$(grep -lr InProgress /tmp/aws-pipeline-status/services)
 IFS=$'\n'; set -f
 string=""
 for path in $running
@@ -11,7 +11,7 @@ do
   read -r _ _ _ name <<< "$path"
   string="$string $blue$name: running $reset https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view"
 done
-string=`echo -e "$string" | column -t | sort`
+string=$(echo -e "$string" | column -t | sort)
 if [ -z "$running" ]; then
   echo "None running"
 fi

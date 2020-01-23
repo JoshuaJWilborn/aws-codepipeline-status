@@ -6,10 +6,10 @@ RGB_TO_FG() {
 RGB_TO_BG() {
   echo -e "\[\033[48;2;$1;$2;$3m\]"
 }
-RED_FG=`RGB_TO_FG 226 120 120`
-GREEN_FG=`RGB_TO_FG 180 190 130`
-BLUE_FG=`RGB_TO_FG 132 160 198`
-GREY_FG=`RGB_TO_FG 198 200 209`
+RED_FG=$(RGB_TO_FG 226 120 120)
+GREEN_FG=$(RGB_TO_FG 180 190 130)
+BLUE_FG=$(RGB_TO_FG 132 160 198)
+GREY_FG=$(RGB_TO_FG 198 200 209)
 
 redicon=●
 greenicon=●
@@ -26,4 +26,4 @@ $BLUE_FG$runningicon $running \
 $GREY_FG$unknownicon $unknown \
 $clear"
 
-echo -e $string
+echo -e "$string"

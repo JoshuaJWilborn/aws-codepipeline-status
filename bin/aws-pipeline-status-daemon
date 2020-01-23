@@ -45,13 +45,13 @@ services=($services)
 
 cleanupscreenandmakenew() {
   screen -wipe >/dev/null
-  screens=$(screen -list | grep $name)
+  screens=$(screen -list | grep "$name")
   if [ ! -z "$screens" ]; then
     echo killing screen
-    screen -S $name -X quit >/dev/null
+    screen -S "$name" -X quit >/dev/null
   fi
   echo making new screen
-  screen -d -S $name -m sh >/dev/null
+  screen -d -S "$name" -m sh >/dev/null
 }
 
 getresultforservice() {
@@ -60,19 +60,19 @@ getresultforservice() {
     echo waiting...
     echo "" >/dev/null
   done
-  if [ ! -p $pipe ]; then
-    mkfifo $pipe
-    chmod 0666 $pipe
+  if [ ! -p "$pipe" ]; then
+    mkfifo "$pipe"
+    chmod 0666 "$pipe"
   fi
-  echo getting $name from $region using $profile
+  echo getting "$name" from "$region" using "$profile"
   cleanupscreenandmakenew
-  screen -S $name -p 0 -X stuff "aws codepipeline get-pipeline-state --name $name --region $region --profile $profile --output json >$pipe ^M"
+  screen -S "$name" -p 0 -X stuff "aws codepipeline get-pipeline-state --name $name --region $region --profile $profile --output json >$pipe ^M"
   sleep 3
-  while read -t 3 line <$pipe
+  while read -t 3 line <"$pipe"
   do
     result="$result$line"
   done
-  rm -f $pipe
+  rm -f "$pipe"
   if [ -z "$result" ]; then
     if [ ! -p "$mfapipe" ]; then
       mkfifo "$mfapipe"
@@ -85,7 +85,7 @@ getresultforservice() {
       echo "MFA $mfa received..."
     done
     rm $mfapipe
-    screen -S $name -p 0 -X stuff "$mfa^M"
+    screen -S "$name" -p 0 -X stuff "$mfa^M"
     sleep 3
   fi
 }
@@ -98,12 +98,12 @@ sendnotification() {
     else
       urgency=low
     fi
-    notify-send -u $urgency $name "$final\n https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view?region=$region"
+    notify-send -u $urgency "$name" "$final\n https://console.aws.amazon.com/codesuite/codepipeline/pipelines/$name/view?region=$region"
   fi
 }
 
 parseresult() {
-  final=$(echo $result | jq ".stageStates[] | select(.stageName == \"$stage\") | .latestExecution.status")
+  final=$(echo "$result" | jq ".stageStates[] | select(.stageName == \"$stage\") | .latestExecution.status")
   if [ -f "$basepath/services/$name" ]; then
     prev=$(<"$basepath/services/$name")
   fi
@@ -111,9 +111,9 @@ parseresult() {
 
 writeresulttofile() {
   if [ -z "$final" ]; then
-    echo "Unknown" > $basepath/services/$name
+    echo "Unknown" > $basepath/services/"$name"
   else
-    echo $final > $basepath/services/$name
+    echo "$final" > $basepath/services/"$name"
   fi
 
 }
@@ -121,10 +121,10 @@ while true
 do
   IFS=$'\n'; set -f
   if [ ! -f "$config" ]; then
-    echo Missing Config $config
+    echo Missing Config "$config"
     exit 1
   fi
-  services=$(jq -cr '.services[] | "\(.name) \(.stage) \(.region) \(.profile)"' <$config)
+  services=$(jq -cr '.services[] | "\(.name) \(.stage) \(.region) \(.profile)"' <"$config")
   for service in $services
   do
     IFS=" ";
@@ -135,7 +135,7 @@ do
     while [ -z "$result" ]; do
       getresultforservice
     done
-    screen -S $name -X quit >/dev/null
+    screen -S "$name" -X quit >/dev/null
     parseresult
     sendnotification
     writeresulttofile
