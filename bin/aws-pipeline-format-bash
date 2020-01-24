@@ -15,15 +15,24 @@ redicon=●
 greenicon=●
 unknownicon=
 runningicon=
-read status
+read -r status
 IFS=" ";
 read -r failed passing running unknown  <<< "$status"
 
-string="\
-$RED_FG$redicon $failed \
-$GREEN_FG$greenicon $passing \
-$BLUE_FG$runningicon $running \
-$GREY_FG$unknownicon $unknown \
-$clear"
+string=""
+if (("$failed" > 0 )); then
+  string="$string $RED_FG$redicon$failed"
+fi
+if (("$passing" > 0 )); then
+  string="$string $GREEN_FG$greenicon$passing"
+fi
+if (("$running" > 0 )); then
+  string="$string $BLUE_FG$runningicon $running"
+fi
+if (("$unknown" > 0 )); then
+   string="$string $GREY_FG$unknownicon $unknown"
+fi
+
+string="${string}${CLEAR_STYLE}"
 
 echo -e "$string"
