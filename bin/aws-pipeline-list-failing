@@ -6,7 +6,7 @@ failedlist=$(grep -lr Failed /tmp/aws-pipeline-status/services/)
 if [ -z "${failedlist}" ]; then
   failed=""
 else
-  failed=$(basename -a $failedlist)
+  failed=$(basename -a "$failedlist")
 fi
 IFS=$'\n'; set -f
 string=""
