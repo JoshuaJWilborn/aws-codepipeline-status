@@ -74,11 +74,12 @@ getresultforservice() {
   done
   rm -f "$pipe"
   if [ -z "$result" ]; then
-    if [ ! -p "$mfapipe" ]; then
-      mkfifo "$mfapipe"
-      chmod 0666 $mfapipe
-    fi
+    echo "No result, assuming expired MFA"
+    rm -f $mfapipe
+    mkfifo "$mfapipe"
+    chmod 0666 $mfapipe
     reg="[0-9]{6,6}"
+    mfa=""
     while [[ ! $mfa =~ ^${reg}$ ]]; do
       echo waiting for mfa...
       read mfa <$mfapipe

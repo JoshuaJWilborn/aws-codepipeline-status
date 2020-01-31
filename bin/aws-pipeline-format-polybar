@@ -17,18 +17,24 @@ read status
 IFS=" ";
 read -r failed passing running unknown <<< "$status"
 
-string="\
-$listfailing \
-%{F$red}$redicon $failed \
-$endclick \
-$listpassing \
-%{F$green}$greenicon $passing \
-$endclick \
-$listrunning \
-%{F$blue}$runningicon $running \
-$endclick \
-%{F$grey} $unknownicon $unknown \
-$endclick"
-
+string=""
+if [ $failed -gt 0 ]; then
+  string="${string}${listfailing}%{F$red}${redicon} ${failed} ${endclick}"
+fi
+if [ $passing -gt 0 ]; then
+  string="${string}${listpassing}%{F$green}${greenicon} ${passing} ${endclick}"
+fi
+if [ $running -gt 0 ]; then
+  string="${string}${listrunning}%{F$blue}$runningicon $running ${endclick}"
+fi
+if [ $unknown -gt 0 ]; then
+  string="${string}%{F$grey} $unknownicon $unknown"
+fi
+if [ -p /tmp/aws-pipeline-status/mfa-pipe ]; then
+  string="${string} %{F$red}⁂"
+fi
+string="${string} "
 echo "$string"
+
+
 

@@ -2,8 +2,12 @@
 bold='\e[1m'
 red='\e[31m'
 reset='\e[0m'
-
-failed=$(basename -a $(grep -lr Failed /tmp/aws-pipeline-status/services/))
+failedlist=$(grep -lr Failed /tmp/aws-pipeline-status/services/)
+if [ -z "${failedlist}" ]; then
+  failed=""
+else
+  failed=$(basename -a $failedlist)
+fi
 IFS=$'\n'; set -f
 string=""
 for path in $failed
