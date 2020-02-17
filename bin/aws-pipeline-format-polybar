@@ -19,16 +19,16 @@ IFS=" ";
 read -r failed passing running unknown <<< "$status"
 
 string=""
-if [ $failed -gt 0 ]; then
+if [ "$failed" -gt 0 ]; then
   string="${string}${listfailing}%{F$red}${redicon} ${failed} ${endclick}"
 fi
-if [ $passing -gt 0 ]; then
+if [ "$passing" -gt 0 ]; then
   string="${string}${listpassing}%{F$green}${greenicon} ${passing} ${endclick}"
 fi
-if [ $running -gt 0 ]; then
+if [ "$running" -gt 0 ]; then
   string="${string}${listrunning}%{F$blue}$runningicon $running ${endclick}"
 fi
-if [ $unknown -gt 0 ]; then
+if [ "$unknown" -gt 0 ]; then
   string="${string}%{F$grey} $unknownicon $unknown"
 fi
 if [ -p /tmp/aws-pipeline-status/mfa-pipe ]; then
