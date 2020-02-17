@@ -2,10 +2,11 @@
 red=#cc6666
 redicon=●
 green=#b5bd68
-greenicon=●
+greenicon="●"
 
 unknownicon=
 runningicon=
+mfaicon=⁂
 blue=#84a0c6
 grey=#c6c8d1
 
@@ -31,7 +32,7 @@ if [ $unknown -gt 0 ]; then
   string="${string}%{F$grey} $unknownicon $unknown"
 fi
 if [ -p /tmp/aws-pipeline-status/mfa-pipe ]; then
-  string="${string} %{F$red}⁂"
+  string="${string} %{F$red}${mfaicon}"
 fi
 string="${string} "
 echo "$string"
